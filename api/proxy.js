@@ -37,8 +37,15 @@ module.exports = async function handler(req, res) {
       console.log('Info status:', infoRes.status);
       if (infoRes.ok) {
         const info = await infoRes.json();
-         console.log('Full info:', JSON.stringify(info).substring(0, 300));
-        if (info.url) finalUrl = info.url;
+        console.log('Full info:', JSON.stringify(info).substring(0, 300));
+        // Použij největší preview URL - ty jsou přístupné bez auth
+        if (info.previews && info.previews.length > 0) {
+          const biggest = info.previews[info.previews.length - 1];
+          finalUrl = biggest.url;
+          console.log('Using preview url:', finalUrl?.substring(0, 80));
+        } else if (info.url) {
+          finalUrl = info.url;
+        }
       }
     }
 
