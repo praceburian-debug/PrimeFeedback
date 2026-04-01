@@ -209,27 +209,39 @@ async function initViewer() {
 
    setStatus('Načítám obrázek…');
   try {
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
-    const imgRes = await fetch(proxyUrl);
-    if (!imgRes.ok) throw new Error('Proxy ' + imgRes.status);
-    const blob    = await imgRes.blob();
-    const blobUrl = URL.createObjectURL(blob);
+    // Najdi největší preview URL
+    const card2 = await t.card('attachments');
+    const att2  = card2.attachments.find(a => a.id === attachmentId);
+    const previews = att2?.previews || [];
+    
+    // Použij největší preview nebo originální URL
+    const biggest = previews.length > 0
+      ? previews[previews.length - 1]
+      : null;
+    
+    const loadUrl = biggest ? biggest.url : imageUrl;
 
-    fabric.Image.fromURL(blobUrl, (img) => {
-      const scale = Math.min(W / img.width, H / img.height, 1);
-      img.scale(scale);
-      img.set({
-        left: (W - img.width * scale) / 2,
-        top:  (H - img.height * scale) / 2,
+    // Načti přes img element (browser má přístup, server ne)
+    const imgEl = new Image();
+    imgEl.crossOrigin = 'anonymous';
+    imgEl.onload = () => {
+      const fabricImg = new fabric.Image(imgEl);
+      const scale = Math.min(W / fabricImg.width, H / fabricImg.height, 1);
+      fabricImg.scale(scale);
+      fabricImg.set({
+        left: (W - fabricImg.width * scale) / 2,
+        top:  (H - fabricImg.height * scale) / 2,
         selectable: false, evented: false,
       });
-      canvas.add(img);
-      canvas.sendToBack(img);
+      canvas.add(fabricImg);
+      canvas.sendToBack(fabricImg);
       setStatus('Připraveno');
       loadAnnotations(cardId, attachmentId);
-    });
+    };
+    imgEl.onerror = () => setStatus('Chyba načítání obrázku — CORS');
+    imgEl.src = loadUrl;
   } catch(e) {
-    setStatus('Chyba načítání obrázku: ' + e.message);
+    setStatus('Chyba: ' + e.message);
   }
 
   setupTools(cardId, attachmentId);
