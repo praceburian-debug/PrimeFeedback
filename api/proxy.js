@@ -23,10 +23,20 @@ module.exports = async function handler(req, res) {
   console.log('fetchUrl starts:', fetchUrl.substring(0, 80));
 
   try {
-        console.log('full fetchUrl:', fetchUrl);
-    const upstream = await fetch(fetchUrl);
+    // Nejdřív získej redirect URL od Trella
+    const trelloRes = await fetch(fetchUrl, { redirect: 'manual' });
+    console.log('Trello status:', trelloRes.status);
+    
+    let finalUrl = fetchUrl;
+    if (trelloRes.status === 302 || trelloRes.status === 301) {
+      finalUrl = trelloRes.headers.get('location');
+      console.log('Redirect to:', finalUrl?.substring(0, 80));
+    }
+    
+    // Stáhni z finální URL (S3) bez autorizace
+    const upstream = await fetch(finalUrl);
+    console.log('Final status:', upstream.status);
     if (!upstream.ok) return res.status(upstream.status).end();
-
     const contentType = upstream.headers.get('content-type') || 'image/png';
     const buffer      = Buffer.from(await upstream.arrayBuffer());
 
