@@ -223,7 +223,6 @@ async function initViewer() {
 
     // Načti přes img element (browser má přístup, server ne)
     const imgEl = new Image();
-    imgEl.crossOrigin = 'anonymous';
     imgEl.onload = () => {
       const fabricImg = new fabric.Image(imgEl);
       const scale = Math.min(W / fabricImg.width, H / fabricImg.height, 1);
