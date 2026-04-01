@@ -37,7 +37,11 @@ module.exports = async function handler(req, res) {
       console.log('Info status:', infoRes.status);
       if (infoRes.ok) {
         const info = await infoRes.json();
-        console.log('Full info:', JSON.stringify(info).substring(0, 300));
+        console.log('Full info:', JSON.stringify(info).substring(0, 500));
+        console.log('Previews count:', info.previews?.length);
+        if (info.previews?.length > 0) {
+          console.log('Last preview:', JSON.stringify(info.previews[info.previews.length - 1]));
+        }
         // Použij největší preview URL - ty jsou přístupné bez auth
         if (info.previews && info.previews.length > 0) {
           const biggest = info.previews[info.previews.length - 1];
