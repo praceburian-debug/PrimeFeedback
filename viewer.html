@@ -108,7 +108,10 @@
 <div id="statusbar">Načítám…</div>
 
 <script>
-const t      = TrelloPowerUp.iframe();
+const t = TrelloPowerUp.iframe({
+  appKey:  'da588fc95ad8059bdbb7cb39ce62eada',
+  appName: 'Image Annotator',
+});
 const params = new URLSearchParams(location.search);
 const MODE   = params.get('mode') || 'viewer';
 
