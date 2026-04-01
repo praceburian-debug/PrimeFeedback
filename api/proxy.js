@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
   console.log('fetchUrl starts:', fetchUrl.substring(0, 80));
 
   try {
+        console.log('full fetchUrl:', fetchUrl);
     const upstream = await fetch(fetchUrl);
     if (!upstream.ok) return res.status(upstream.status).end();
 
