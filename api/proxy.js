@@ -22,21 +22,31 @@ module.exports = async function handler(req, res) {
   console.log('apiToken:', apiToken ? 'OK' : 'MISSING');
   console.log('fetchUrl starts:', fetchUrl.substring(0, 80));
 
-  try {
-    // Nejdřív získej redirect URL od Trella
-    const trelloRes = await fetch(fetchUrl, { redirect: 'manual' });
-    console.log('Trello status:', trelloRes.status);
+ try {
+    // Použij Trello API místo přímého download linku
+    // Extrahuj cardId a attachmentId z URL
+    const match = url.match(/cards\/([^/]+)\/attachments\/([^/]+)\/download/);
     
     let finalUrl = fetchUrl;
-    if (trelloRes.status === 302 || trelloRes.status === 301) {
-      finalUrl = trelloRes.headers.get('location');
-      console.log('Redirect to:', finalUrl?.substring(0, 80));
+    if (match) {
+      const [, cardId, attId] = match;
+      // Nejdřív získej attachment info přes API
+      const infoRes = await fetch(
+        `https://api.trello.com/1/cards/${cardId}/attachments/${attId}?key=${apiKey}&token=${apiToken}`
+      );
+      console.log('Info status:', infoRes.status);
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        console.log('Attachment url:', info.url?.substring(0, 80));
+        // Použij url z API response — může být signed S3 URL
+        if (info.url) finalUrl = info.url;
+      }
     }
-    
-    // Stáhni z finální URL (S3) bez autorizace
+
     const upstream = await fetch(finalUrl);
     console.log('Final status:', upstream.status);
     if (!upstream.ok) return res.status(upstream.status).end();
+
     const contentType = upstream.headers.get('content-type') || 'image/png';
     const buffer      = Buffer.from(await upstream.arrayBuffer());
 
