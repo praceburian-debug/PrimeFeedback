@@ -37,8 +37,7 @@ module.exports = async function handler(req, res) {
       console.log('Info status:', infoRes.status);
       if (infoRes.ok) {
         const info = await infoRes.json();
-        console.log('Attachment url:', info.url?.substring(0, 80));
-        // Použij url z API response — může být signed S3 URL
+         console.log('Full info:', JSON.stringify(info).substring(0, 300));
         if (info.url) finalUrl = info.url;
       }
     }
