@@ -11,90 +11,156 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 13px;
-      background: #1a1a2e;
+      background: #1c1c1e;
       color: #e0e0e8;
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      height: 44px;
+      background: #111113;
+      border-bottom: 1px solid #2a2a2e;
+      flex-shrink: 0;
+      position: relative;
+    }
+    #topbar-left, #topbar-right { display: flex; align-items: center; gap: 6px; z-index: 1; }
+    #topbar-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-size: 13px; font-weight: 500; color: #b0b0c0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 280px; pointer-events: none;
+    }
     #toolbar {
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 6px 10px;
-      background: #16213e;
-      border-bottom: 1px solid #0f3460;
+      gap: 2px;
+      padding: 5px 12px;
+      background: #18181a;
+      border-bottom: 1px solid #2a2a2e;
       flex-shrink: 0;
-      flex-wrap: wrap;
     }
     .tool-btn {
       display: flex; align-items: center; justify-content: center;
-      width: 34px; height: 34px;
-      border: 1px solid transparent; border-radius: 6px;
-      background: transparent; color: #9a9ab0;
-      cursor: pointer; transition: all .15s; font-size: 17px;
+      width: 32px; height: 32px;
+      border: none; border-radius: 6px;
+      background: transparent; color: #707080;
+      cursor: pointer; transition: all .12s;
+      position: relative;
     }
-    .tool-btn:hover  { background: #0f3460; color: #e0e0e8; }
-    .tool-btn.active { background: #0f3460; border-color: #e94560; color: #e94560; }
-    .sep { width: 1px; height: 24px; background: #0f3460; margin: 0 4px; }
+    .tool-btn:hover { background: #26262a; color: #d0d0e0; }
+    .tool-btn.active { background: #26262a; color: #fff; }
+    .tool-btn.active::after {
+      content: '';
+      position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 14px; height: 2px; border-radius: 1px;
+      background: #7b68ee;
+    }
+    .sep { width: 1px; height: 18px; background: #2a2a2e; margin: 0 5px; }
     #color-pick {
-      width: 28px; height: 28px;
-      border: 2px solid #0f3460; border-radius: 50%;
+      width: 22px; height: 22px;
+      border: 2px solid #3a3a40; border-radius: 50%;
       cursor: pointer; padding: 0; background: none;
+      transition: border-color .12s;
     }
-    #stroke-size { width: 70px; accent-color: #e94560; }
-    .action-btn {
-      padding: 5px 12px; border-radius: 6px; border: none;
-      cursor: pointer; font-size: 12px; font-weight: 600; transition: opacity .15s;
+    #color-pick:hover { border-color: #7b68ee; }
+    #stroke-size { width: 60px; accent-color: #7b68ee; cursor: pointer; }
+    #stroke-label { font-size: 11px; color: #505060; min-width: 16px; }
+    .tb-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 6px; border: none;
+      cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: all .12s; white-space: nowrap;
     }
-    .action-btn:hover { opacity: .85; }
-    .btn-save  { background: #e94560; color: #fff; margin-left: auto; }
-    .btn-clear { background: #0f3460; color: #9a9ab0; }
-    .btn-undo  { background: #0f3460; color: #9a9ab0; }
+    .tb-btn:hover { opacity: .85; }
+    .btn-save  { background: #7b68ee; color: #fff; }
+    .btn-undo  { background: #26262a; color: #9090a0; }
+    .btn-clear { background: #26262a; color: #9090a0; }
+    .icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; flex-shrink: 0; }
     #canvas-wrap {
       flex: 1; position: relative; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
+      background: #232325;
     }
     #canvas-wrap canvas { display: block; }
     #picker-view { padding: 12px; display: none; flex-direction: column; gap: 8px; }
     .att-item {
       display: flex; align-items: center; gap: 10px;
       padding: 8px 10px; border-radius: 8px;
-      background: #16213e; border: 1px solid #0f3460;
-      cursor: pointer; transition: border-color .15s;
+      background: #18181a; border: 1px solid #2a2a2e;
+      cursor: pointer; transition: border-color .12s;
     }
-    .att-item:hover { border-color: #e94560; }
+    .att-item:hover { border-color: #7b68ee; }
     .att-item img { width: 48px; height: 36px; object-fit: cover; border-radius: 4px; }
-    .att-name { font-size: 12px; color: #c0c0d0; }
+    .att-name { font-size: 12px; color: #909090; }
     #statusbar {
-      padding: 3px 10px; font-size: 11px;
-      color: #6060a0; background: #16213e;
-      border-top: 1px solid #0f3460; flex-shrink: 0;
+      padding: 3px 12px; font-size: 11px;
+      color: #444458; background: #111113;
+      border-top: 1px solid #2a2a2e; flex-shrink: 0;
     }
     #text-input-wrap { position: absolute; display: none; z-index: 100; }
     #text-input {
-      background: rgba(22,33,62,.95); border: 1px solid #e94560;
-      color: #e0e0e8; padding: 4px 8px; border-radius: 4px;
-      font-size: 14px; outline: none; min-width: 140px;
+      background: rgba(17,17,19,.96); border: 1px solid #7b68ee;
+      color: #e0e0e8; padding: 5px 10px; border-radius: 6px;
+      font-size: 14px; outline: none; min-width: 160px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
     }
   </style>
 </head>
 <body>
 
+<div id="topbar">
+  <div id="topbar-left">
+    <button class="tb-btn btn-undo" id="btn-undo">
+      <svg class="icon" viewBox="0 0 16 16"><path d="M2.5 6.5h7a3.5 3.5 0 0 1 0 7H5"/><polyline points="2.5,3.5 2.5,6.5 5.5,6.5"/></svg>
+      Zpět
+    </button>
+    <button class="tb-btn btn-clear" id="btn-clear">
+      <svg class="icon" viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      Smazat
+    </button>
+  </div>
+
+  <div id="topbar-center">—</div>
+
+  <div id="topbar-right">
+    <button class="tb-btn btn-save" id="btn-save">
+      <svg class="icon" viewBox="0 0 16 16"><path d="M13 11v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2"/><line x1="8" y1="2" x2="8" y2="10"/><polyline points="5,7 8,10 11,7"/></svg>
+      Uložit
+    </button>
+  </div>
+</div>
+
 <div id="toolbar">
-  <button class="tool-btn active" data-tool="select"  title="Výběr (V)">↖</button>
-  <button class="tool-btn"        data-tool="pencil"  title="Kresba (P)">✏</button>
-  <button class="tool-btn"        data-tool="arrow"   title="Šipka (A)">→</button>
-  <button class="tool-btn"        data-tool="rect"    title="Obdélník (R)">▭</button>
-  <button class="tool-btn"        data-tool="text"    title="Text (T)">T</button>
+  <button class="tool-btn active" data-tool="select" title="Výběr">
+    <svg class="icon" viewBox="0 0 16 16"><path d="M3 2l10 5.5-5.5 1.2L6 14z"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="pencil" title="Volná kresba">
+    <svg class="icon" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2z"/><path d="M9.5 4.5l2 2"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="arrow" title="Šipka">
+    <svg class="icon" viewBox="0 0 16 16"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="rect" title="Obdélník">
+    <svg class="icon" viewBox="0 0 16 16"><rect x="2.5" y="4" width="11" height="8.5" rx="1.5"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="text" title="Text">
+    <svg class="icon" viewBox="0 0 16 16"><line x1="3" y1="4" x2="13" y2="4"/><line x1="8" y1="4" x2="8" y2="13"/><line x1="5" y1="13" x2="11" y2="13"/></svg>
+  </button>
+
   <div class="sep"></div>
-  <input type="color" id="color-pick"  value="#e94560" title="Barva" />
+
+  <input type="color" id="color-pick" value="#7b68ee" title="Barva" />
+
+  <div class="sep"></div>
+
   <input type="range" id="stroke-size" min="1" max="20" value="3" title="Tloušťka" />
-  <div class="sep"></div>
-  <button class="action-btn btn-undo"  id="btn-undo">↩ Zpět</button>
-  <button class="action-btn btn-clear" id="btn-clear">✕ Smazat</button>
-  <button class="action-btn btn-save"  id="btn-save">💾 Uložit</button>
+  <span id="stroke-label">3</span>
 </div>
 
 <div id="canvas-wrap">
@@ -108,7 +174,7 @@
 <div id="statusbar">Načítám…</div>
 
 <script>
-const t = TrelloPowerUp.iframe({
+const t      = TrelloPowerUp.iframe({
   appKey:  'da588fc95ad8059bdbb7cb39ce62eada',
   appName: 'Image Annotator',
 });
@@ -122,6 +188,13 @@ let history = [];
 const color     = () => document.getElementById('color-pick').value;
 const lineWidth = () => parseInt(document.getElementById('stroke-size').value);
 
+document.getElementById('stroke-size').addEventListener('input', function() {
+  document.getElementById('stroke-label').textContent = this.value;
+  if (canvas) {
+    canvas.freeDrawingBrush.width = parseInt(this.value);
+  }
+});
+
 async function init() {
   if (MODE === 'picker')  return initPicker();
   if (MODE === 'section') return initSection();
@@ -130,6 +203,7 @@ async function init() {
 }
 
 async function initPicker() {
+  document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
   document.getElementById('canvas-wrap').style.display = 'none';
   const wrap = document.getElementById('picker-view');
@@ -139,7 +213,7 @@ async function initPicker() {
     a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
   );
   if (!atts.length) {
-    wrap.innerHTML = '<p style="padding:16px;color:#6060a0">Na kartě nejsou žádné obrázky.</p>';
+    wrap.innerHTML = '<p style="padding:16px;color:#505060">Na kartě nejsou žádné obrázky.</p>';
     t.sizeTo('#picker-view'); return;
   }
   atts.forEach(a => {
@@ -148,8 +222,7 @@ async function initPicker() {
     el.innerHTML = `<img src="${a.previews?.[0]?.url || a.url}" alt=""><span class="att-name">${a.name}</span>`;
     el.onclick = () => t.modal({
       url:    t.signUrl(location.origin + `/viewer.html?mode=viewer&attId=${a.id}`),
-      height: 640,
-      title:  a.name,
+      height: 640, title: a.name,
     });
     wrap.appendChild(el);
   });
@@ -157,6 +230,7 @@ async function initPicker() {
 }
 
 async function initSection() {
+  document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
   document.getElementById('canvas-wrap').style.display = 'none';
   const card = await t.card('attachments', 'id');
@@ -164,7 +238,7 @@ async function initSection() {
     a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
   ).length;
   const bar = document.getElementById('statusbar');
-  bar.style.cssText = 'padding:10px;font-size:13px;color:#c0c0d0;border:none;';
+  bar.style.cssText = 'padding:10px;font-size:13px;color:#a0a0b0;border:none;background:#111113;';
   bar.textContent = count
     ? `${count} obrázk${count === 1 ? '' : 'y/u'} připraveno k anotaci`
     : 'Na kartě nejsou obrázky.';
@@ -172,17 +246,18 @@ async function initSection() {
 }
 
 async function initAuth() {
+  document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
   document.getElementById('canvas-wrap').style.display = 'none';
   const bar = document.getElementById('statusbar');
-  bar.style.cssText = 'padding:12px;font-size:13px;color:#c0c0d0;border:none;';
+  bar.style.cssText = 'padding:12px;font-size:13px;color:#a0a0b0;border:none;';
   bar.textContent = 'Autorizace…';
   t.sizeTo('body');
 }
 
 async function initViewer() {
   setStatus('Načítám kartu…');
-  let cardId, attachmentId, imageUrl;
+  let cardId, attachmentId, imageUrl, fileName;
   try {
     const attId = params.get('attId');
     const card  = await t.card('attachments', 'id');
@@ -195,9 +270,12 @@ async function initViewer() {
     if (!att) { setStatus('Žádný obrázek nenalezen.'); return; }
     attachmentId = att.id;
     imageUrl     = att.url;
+    fileName     = att.name;
   } catch (e) {
     setStatus('Chyba při načítání karty: ' + e.message); return;
   }
+
+  document.getElementById('topbar-center').textContent = fileName || '—';
 
   const wrap = document.getElementById('canvas-wrap');
   const W = wrap.clientWidth  || 700;
@@ -207,21 +285,14 @@ async function initViewer() {
     width: W, height: H, selection: true, isDrawingMode: false,
   });
 
-   setStatus('Načítám obrázek…');
+  setStatus('Načítám obrázek…');
   try {
-    // Najdi největší preview URL
-    const card2 = await t.card('attachments');
-    const att2  = card2.attachments.find(a => a.id === attachmentId);
+    const card2    = await t.card('attachments');
+    const att2     = card2.attachments.find(a => a.id === attachmentId);
     const previews = att2?.previews || [];
-    
-    // Použij největší preview nebo originální URL
-    const biggest = previews.length > 0
-      ? previews[previews.length - 1]
-      : null;
-    
-    const loadUrl = biggest ? biggest.url : imageUrl;
+    const biggest  = previews.length > 0 ? previews[previews.length - 1] : null;
+    const loadUrl  = biggest ? biggest.url : imageUrl;
 
-    // Načti přes img element (browser má přístup, server ne)
     const imgEl = new Image();
     imgEl.onload = () => {
       const fabricImg = new fabric.Image(imgEl);
@@ -237,7 +308,7 @@ async function initViewer() {
       setStatus('Připraveno');
       loadAnnotations(cardId, attachmentId);
     };
-    imgEl.onerror = () => setStatus('Chyba načítání obrázku — CORS');
+    imgEl.onerror = () => setStatus('Chyba načítání obrázku');
     imgEl.src = loadUrl;
   } catch(e) {
     setStatus('Chyba: ' + e.message);
@@ -262,9 +333,6 @@ function setupTools(cardId, attachmentId) {
   document.getElementById('color-pick').addEventListener('input', () => {
     canvas.freeDrawingBrush.color = color();
   });
-  document.getElementById('stroke-size').addEventListener('input', () => {
-    canvas.freeDrawingBrush.width = lineWidth();
-  });
 
   canvas.on('mouse:down', (opt) => {
     if (activeTool === 'select' || activeTool === 'pencil') return;
@@ -279,7 +347,7 @@ function setupTools(cardId, attachmentId) {
       tempShape = new fabric.Rect({
         left: p.x, top: p.y, width: 0, height: 0,
         stroke: color(), strokeWidth: lineWidth(),
-        fill: 'transparent', selectable: false, evented: false,
+        fill: 'transparent', selectable: false, evented: false, rx: 2, ry: 2,
       });
     }
     if (tempShape) canvas.add(tempShape);
@@ -309,8 +377,7 @@ function setupTools(cardId, attachmentId) {
       const dy    = ln.y2 - ln.y1;
       const angle = Math.atan2(dy, dx) * 180 / Math.PI;
       canvas.add(new fabric.Triangle({
-        left: ln.x2, top: ln.y2,
-        width: 12, height: 16,
+        left: ln.x2, top: ln.y2, width: 12, height: 16,
         fill: color(), stroke: 'transparent',
         originX: 'center', originY: 'center',
         angle: angle + 90, selectable: false,
@@ -331,6 +398,7 @@ function setupTools(cardId, attachmentId) {
     canvas.clear();
     if (bg) canvas.add(bg);
     history = [];
+    setStatus('Canvas vyčištěn');
   });
   document.getElementById('btn-save').addEventListener('click', () =>
     saveAnnotations(cardId, attachmentId)
@@ -372,11 +440,7 @@ function undo() {
 
 async function loadAnnotations(cardId, attachmentId) {
   try {
-    const token = await t.getRestApi().getToken().catch(() => null);
-    const res   = await fetch(
-      `/api/annotations?cardId=${cardId}&attachmentId=${attachmentId}`,
-      { headers: token ? { 'x-trello-token': token } : {} }
-    );
+    const res = await fetch(`/api/annotations?cardId=${cardId}&attachmentId=${attachmentId}`);
     if (!res.ok) return;
     const { data } = await res.json();
     if (data && Object.keys(data).length) {
@@ -393,20 +457,23 @@ async function loadAnnotations(cardId, attachmentId) {
 
 async function saveAnnotations(cardId, attachmentId) {
   setStatus('Ukládám…');
+  const btn = document.getElementById('btn-save');
   try {
-    const token = await t.getRestApi().getToken().catch(() => null);
-    const res   = await fetch('/api/annotations', {
+    const res = await fetch('/api/annotations', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'x-trello-token': token } : {}),
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cardId, attachmentId,
         data: canvas.toJSON(['selectable', 'evented']),
       }),
     });
-    setStatus(res.ok ? '✓ Uloženo' : 'Chyba při ukládání: ' + res.status);
+    if (res.ok) {
+      setStatus('✓ Uloženo');
+      btn.style.background = '#22c55e';
+      setTimeout(() => { btn.style.background = '#7b68ee'; }, 1800);
+    } else {
+      setStatus('Chyba při ukládání: ' + res.status);
+    }
   } catch (e) { setStatus('Chyba: ' + e.message); }
 }
 
