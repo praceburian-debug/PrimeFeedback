@@ -5,10 +5,16 @@ async function redisGet(key) {
   const res  = await fetch(`${REDIS_URL}/get/${encodeURIComponent(key)}`, {
     headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
   });
-  const json = await res.json();
-  return json.result ?? null;
+  const text = await res.text();
+  console.log('Redis GET raw:', text.substring(0, 200));
+  try {
+    const json = JSON.parse(text);
+    return json.result ?? null;
+  } catch(e) {
+    console.log('Redis GET parse error:', e.message);
+    return null;
+  }
 }
-
 async function redisSet(key, value) {
   // Upstash pipeline — ['SET', key, value] kde value musí být string
   const res = await fetch(`${REDIS_URL}/pipeline`, {
