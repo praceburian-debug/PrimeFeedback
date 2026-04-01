@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>Trello Image Annotator — Power-Up</title>
+</head>
+<body>
+<script src="https://p.trellocdn.com/power-up.min.js"></script>
+<script>
+  const VIEWER_URL = window.location.origin + '/viewer.html';
+
+  TrelloPowerUp.initialize({
+
+    'attachment-sections': async (t, options) => {
+      const images = options.entries.filter(e =>
+        e.attachment?.mimeType?.startsWith('image/') ||
+        /\.(png|jpe?g|gif|webp|svg)$/i.test(e.attachment?.url ?? '')
+      );
+      if (!images.length) return [];
+      return [{
+        id:    'annotator',
+        icon:  window.location.origin + '/assets/icon.png',
+        title: 'Anotace obrázků',
+        content: {
+          type:   'iframe',
+          url:    t.signUrl(VIEWER_URL + '?mode=section'),
+          height: 48,
+        },
+      }];
+    },
+
+    'card-back-section': (t) => ({
+      title: 'Anotace obrázků',
+      icon:  window.location.origin + '/assets/icon.png',
+      content: {
+        type:   'iframe',
+        url:    t.signUrl(VIEWER_URL + '?mode=section'),
+        height: 52,
+      },
+    }),
+
+    'card-buttons': (t) => ([{
+      icon:      window.location.origin + '/assets/icon.png',
+      text:      'Anotovat přílohy',
+      condition: 'edit',
+      callback:  (t) => t.modal({
+        url:    t.signUrl(VIEWER_URL + '?mode=picker'),
+        height: 600,
+        title:  'Vyberte přílohu k anotaci',
+      }),
+    }]),
+
+    'authorization-status': async (t) => {
+      const token = await t.get('member', 'private', 'token');
+      return { authorized: !!token };
+    },
+
+    'show-authorization': (t) => t.popup({
+      title:  'Přihlásit se',
+      url:    t.signUrl(VIEWER_URL + '?mode=auth'),
+      height: 140,
+    }),
+
+  }, {
+    appKey:  'TRELLO_APP_KEY',
+    appName: 'Image Annotator',
+  });
+</script>
+</body>
+</html>
