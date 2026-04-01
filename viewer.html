@@ -205,20 +205,32 @@ async function initViewer() {
   });
 
   setStatus('Načítám obrázek…');
-const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
-fabric.Image.fromURL(proxyUrl, (img) => {
-    const scale = Math.min(W / img.width, H / img.height, 1);
-    img.scale(scale);
-    img.set({
-      left: (W - img.width * scale) / 2,
-      top:  (H - img.height * scale) / 2,
-      selectable: false, evented: false,
+  try {
+    const token = await t.getRestApi().getToken().catch(() => null);
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
+    const imgRes = await fetch(proxyUrl, {
+      headers: token ? { 'x-trello-token': token } : {},
     });
-    canvas.add(img);
-    canvas.sendToBack(img);
-    setStatus('Připraveno');
-    loadAnnotations(cardId, attachmentId);
-  });
+    if (!imgRes.ok) throw new Error('Proxy ' + imgRes.status);
+    const blob    = await imgRes.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    fabric.Image.fromURL(blobUrl, (img) => {
+      const scale = Math.min(W / img.width, H / img.height, 1);
+      img.scale(scale);
+      img.set({
+        left: (W - img.width * scale) / 2,
+        top:  (H - img.height * scale) / 2,
+        selectable: false, evented: false,
+      });
+      canvas.add(img);
+      canvas.sendToBack(img);
+      setStatus('Připraveno');
+      loadAnnotations(cardId, attachmentId);
+    });
+  } catch(e) {
+    setStatus('Chyba načítání obrázku: ' + e.message);
+  }
 
   setupTools(cardId, attachmentId);
 }
