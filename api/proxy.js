@@ -18,6 +18,9 @@ module.exports = async function handler(req, res) {
   const fetchUrl = apiKey && apiToken
     ? `${url}${sep}key=${apiKey}&token=${apiToken}`
     : url;
+  console.log('apiKey:', apiKey ? 'OK' : 'MISSING');
+  console.log('apiToken:', apiToken ? 'OK' : 'MISSING');
+  console.log('fetchUrl starts:', fetchUrl.substring(0, 80));
 
   try {
     const upstream = await fetch(fetchUrl);
