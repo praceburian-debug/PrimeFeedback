@@ -1,13 +1,13 @@
 /**
  * /api/proxy?url=...
- * Stáhne obrázek na serveru a pošle zpět — obchází CORS blokaci Trella.
+ * Stáhne obrázek na serveru s Trello tokenem — obchází CORS blokaci.
+ * Token předáváme v hlavičce x-trello-token z viewer.html
  */
 export default async function handler(req, res) {
   const { url } = req.query;
 
   if (!url) return res.status(400).json({ error: 'url required' });
 
-  // Povolíme pouze trello.com a amazonaws.com (Trello attachments)
   let parsed;
   try { parsed = new URL(url); } catch {
     return res.status(400).json({ error: 'invalid url' });
@@ -17,8 +17,17 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'domain not allowed' });
   }
 
+  const token  = req.headers['x-trello-token'];
+  const apiKey = process.env.TRELLO_API_KEY;
+
+  let fetchUrl = url;
+  if (token && apiKey) {
+    const sep = url.includes('?') ? '&' : '?';
+    fetchUrl = `${url}${sep}key=${apiKey}&token=${token}`;
+  }
+
   try {
-    const upstream = await fetch(url);
+    const upstream = await fetch(fetchUrl);
     if (!upstream.ok) return res.status(upstream.status).end();
 
     const contentType = upstream.headers.get('content-type') || 'image/png';
