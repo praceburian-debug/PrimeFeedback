@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>Image Annotator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #1a1a2e;
+      color: #e0e0e8;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: #16213e;
+      border-bottom: 1px solid #0f3460;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .tool-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px;
+      border: 1px solid transparent; border-radius: 6px;
+      background: transparent; color: #9a9ab0;
+      cursor: pointer; transition: all .15s; font-size: 17px;
+    }
+    .tool-btn:hover  { background: #0f3460; color: #e0e0e8; }
+    .tool-btn.active { background: #0f3460; border-color: #e94560; color: #e94560; }
+    .sep { width: 1px; height: 24px; background: #0f3460; margin: 0 4px; }
+    #color-pick {
+      width: 28px; height: 28px;
+      border: 2px solid #0f3460; border-radius: 50%;
+      cursor: pointer; padding: 0; background: none;
+    }
+    #stroke-size { width: 70px; accent-color: #e94560; }
+    .action-btn {
+      padding: 5px 12px; border-radius: 6px; border: none;
+      cursor: pointer; font-size: 12px; font-weight: 600; transition: opacity .15s;
+    }
+    .action-btn:hover { opacity: .85; }
+    .btn-save  { background: #e94560; color: #fff; margin-left: auto; }
+    .btn-clear { background: #0f3460; color: #9a9ab0; }
+    .btn-undo  { background: #0f3460; color: #9a9ab0; }
+    #canvas-wrap {
+      flex: 1; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #canvas-wrap canvas { display: block; }
+    #picker-view { padding: 12px; display: none; flex-direction: column; gap: 8px; }
+    .att-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 8px;
+      background: #16213e; border: 1px solid #0f3460;
+      cursor: pointer; transition: border-color .15s;
+    }
+    .att-item:hover { border-color: #e94560; }
+    .att-item img { width: 48px; height: 36px; object-fit: cover; border-radius: 4px; }
+    .att-name { font-size: 12px; color: #c0c0d0; }
+    #statusbar {
+      padding: 3px 10px; font-size: 11px;
+      color: #6060a0; background: #16213e;
+      border-top: 1px solid #0f3460; flex-shrink: 0;
+    }
+    #text-input-wrap { position: absolute; display: none; z-index: 100; }
+    #text-input {
+      background: rgba(22,33,62,.95); border: 1px solid #e94560;
+      color: #e0e0e8; padding: 4px 8px; border-radius: 4px;
+      font-size: 14px; outline: none; min-width: 140px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button class="tool-btn active" data-tool="select"  title="Výběr (V)">↖</button>
+  <button class="tool-btn"        data-tool="pencil"  title="Kresba (P)">✏</button>
+  <button class="tool-btn"        data-tool="arrow"   title="Šipka (A)">→</button>
+  <button class="tool-btn"        data-tool="rect"    title="Obdélník (R)">▭</button>
+  <button class="tool-btn"        data-tool="text"    title="Text (T)">T</button>
+  <div class="sep"></div>
+  <input type="color" id="color-pick"  value="#e94560" title="Barva" />
+  <input type="range" id="stroke-size" min="1" max="20" value="3" title="Tloušťka" />
+  <div class="sep"></div>
+  <button class="action-btn btn-undo"  id="btn-undo">↩ Zpět</button>
+  <button class="action-btn btn-clear" id="btn-clear">✕ Smazat</button>
+  <button class="action-btn btn-save"  id="btn-save">💾 Uložit</button>
+</div>
+
+<div id="canvas-wrap">
+  <canvas id="ann-canvas"></canvas>
+  <div id="text-input-wrap">
+    <input id="text-input" type="text" placeholder="Zadejte text…" />
+  </div>
+</div>
+
+<div id="picker-view"></div>
+<div id="statusbar">Načítám…</div>
+
+<script>
+const t      = TrelloPowerUp.iframe();
+const params = new URLSearchParams(location.search);
+const MODE   = params.get('mode') || 'viewer';
+
+let canvas, activeTool = 'select';
+let drawStart = null, tempShape = null;
+let history = [];
+
+const color     = () => document.getElementById('color-pick').value;
+const lineWidth = () => parseInt(document.getElementById('stroke-size').value);
+
+async function init() {
+  if (MODE === 'picker')  return initPicker();
+  if (MODE === 'section') return initSection();
+  if (MODE === 'auth')    return initAuth();
+  await initViewer();
+}
+
+async function initPicker() {
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('canvas-wrap').style.display = 'none';
+  const wrap = document.getElementById('picker-view');
+  wrap.style.display = 'flex';
+  const card = await t.card('attachments', 'id');
+  const atts = (card.attachments || []).filter(a =>
+    a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
+  );
+  if (!atts.length) {
+    wrap.innerHTML = '<p style="padding:16px;color:#6060a0">Na kartě nejsou žádné obrázky.</p>';
+    t.sizeTo('#picker-view'); return;
+  }
+  atts.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'att-item';
+    el.innerHTML = `<img src="${a.previews?.[0]?.url || a.url}" alt=""><span class="att-name">${a.name}</span>`;
+    el.onclick = () => t.modal({
+      url:    t.signUrl(location.origin + `/viewer.html?mode=viewer&attId=${a.id}`),
+      height: 640,
+      title:  a.name,
+    });
+    wrap.appendChild(el);
+  });
+  t.sizeTo('#picker-view');
+}
+
+async function initSection() {
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('canvas-wrap').style.display = 'none';
+  const card = await t.card('attachments', 'id');
+  const count = (card.attachments || []).filter(a =>
+    a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
+  ).length;
+  const bar = document.getElementById('statusbar');
+  bar.style.cssText = 'padding:10px;font-size:13px;color:#c0c0d0;border:none;';
+  bar.textContent = count
+    ? `${count} obrázk${count === 1 ? '' : 'y/u'} připraveno k anotaci`
+    : 'Na kartě nejsou obrázky.';
+  t.sizeTo('body');
+}
+
+async function initAuth() {
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('canvas-wrap').style.display = 'none';
+  const bar = document.getElementById('statusbar');
+  bar.style.cssText = 'padding:12px;font-size:13px;color:#c0c0d0;border:none;';
+  bar.textContent = 'Autorizace…';
+  t.sizeTo('body');
+}
+
+async function initViewer() {
+  setStatus('Načítám kartu…');
+  let cardId, attachmentId, imageUrl;
+  try {
+    const attId = params.get('attId');
+    const card  = await t.card('attachments', 'id');
+    cardId = card.id;
+    const att = attId
+      ? card.attachments.find(a => a.id === attId)
+      : card.attachments.find(a =>
+          a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
+        );
+    if (!att) { setStatus('Žádný obrázek nenalezen.'); return; }
+    attachmentId = att.id;
+    imageUrl     = att.url;
+  } catch (e) {
+    setStatus('Chyba při načítání karty: ' + e.message); return;
+  }
+
+  const wrap = document.getElementById('canvas-wrap');
+  const W = wrap.clientWidth  || 700;
+  const H = wrap.clientHeight || 480;
+
+  canvas = new fabric.Canvas('ann-canvas', {
+    width: W, height: H, selection: true, isDrawingMode: false,
+  });
+
+  setStatus('Načítám obrázek…');
+  fabric.Image.fromURL(imageUrl, (img) => {
+    const scale = Math.min(W / img.width, H / img.height, 1);
+    img.scale(scale);
+    img.set({
+      left: (W - img.width * scale) / 2,
+      top:  (H - img.height * scale) / 2,
+      selectable: false, evented: false,
+    });
+    canvas.add(img);
+    canvas.sendToBack(img);
+    setStatus('Připraveno');
+    loadAnnotations(cardId, attachmentId);
+  }, { crossOrigin: 'anonymous' });
+
+  setupTools(cardId, attachmentId);
+}
+
+function setupTools(cardId, attachmentId) {
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTool = btn.dataset.tool;
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      canvas.isDrawingMode = (activeTool === 'pencil');
+      canvas.selection     = (activeTool === 'select');
+    });
+  });
+
+  canvas.freeDrawingBrush.color = color();
+  canvas.freeDrawingBrush.width = lineWidth();
+  document.getElementById('color-pick').addEventListener('input', () => {
+    canvas.freeDrawingBrush.color = color();
+  });
+  document.getElementById('stroke-size').addEventListener('input', () => {
+    canvas.freeDrawingBrush.width = lineWidth();
+  });
+
+  canvas.on('mouse:down', (opt) => {
+    if (activeTool === 'select' || activeTool === 'pencil') return;
+    const p = canvas.getPointer(opt.e);
+    drawStart = { x: p.x, y: p.y };
+    if (activeTool === 'text') { placeTextInput(p.x, p.y); return; }
+    if (activeTool === 'arrow') {
+      tempShape = new fabric.Line([p.x, p.y, p.x, p.y], {
+        stroke: color(), strokeWidth: lineWidth(), selectable: false, evented: false,
+      });
+    } else if (activeTool === 'rect') {
+      tempShape = new fabric.Rect({
+        left: p.x, top: p.y, width: 0, height: 0,
+        stroke: color(), strokeWidth: lineWidth(),
+        fill: 'transparent', selectable: false, evented: false,
+      });
+    }
+    if (tempShape) canvas.add(tempShape);
+  });
+
+  canvas.on('mouse:move', (opt) => {
+    if (!tempShape || !drawStart) return;
+    const p = canvas.getPointer(opt.e);
+    if (activeTool === 'arrow') {
+      tempShape.set({ x2: p.x, y2: p.y });
+    } else if (activeTool === 'rect') {
+      tempShape.set({
+        left:   Math.min(drawStart.x, p.x),
+        top:    Math.min(drawStart.y, p.y),
+        width:  Math.abs(p.x - drawStart.x),
+        height: Math.abs(p.y - drawStart.y),
+      });
+    }
+    canvas.renderAll();
+  });
+
+  canvas.on('mouse:up', () => {
+    if (!tempShape) return;
+    if (activeTool === 'arrow') {
+      const ln    = tempShape;
+      const dx    = ln.x2 - ln.x1;
+      const dy    = ln.y2 - ln.y1;
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      canvas.add(new fabric.Triangle({
+        left: ln.x2, top: ln.y2,
+        width: 12, height: 16,
+        fill: color(), stroke: 'transparent',
+        originX: 'center', originY: 'center',
+        angle: angle + 90, selectable: false,
+      }));
+      ln.set({ selectable: true, evented: true });
+    } else if (activeTool === 'rect') {
+      tempShape.set({ selectable: true, evented: true });
+    }
+    pushHistory();
+    tempShape = null; drawStart = null;
+  });
+
+  canvas.on('path:created', pushHistory);
+
+  document.getElementById('btn-undo').addEventListener('click', undo);
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    const bg = canvas.item(0);
+    canvas.clear();
+    if (bg) canvas.add(bg);
+    history = [];
+  });
+  document.getElementById('btn-save').addEventListener('click', () =>
+    saveAnnotations(cardId, attachmentId)
+  );
+}
+
+function placeTextInput(x, y) {
+  const wrap  = document.getElementById('text-input-wrap');
+  const input = document.getElementById('text-input');
+  wrap.style.display = 'block';
+  wrap.style.left = (canvas._offset.left + x) + 'px';
+  wrap.style.top  = (canvas._offset.top  + y) + 'px';
+  input.value = '';
+  input.focus();
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter')  commitText(x, y);
+    if (e.key === 'Escape') wrap.style.display = 'none';
+  };
+}
+
+function commitText(x, y) {
+  const wrap  = document.getElementById('text-input-wrap');
+  const input = document.getElementById('text-input');
+  if (!input.value.trim()) { wrap.style.display = 'none'; return; }
+  canvas.add(new fabric.Text(input.value.trim(), {
+    left: x, top: y, fontSize: 18, fill: color(),
+    fontFamily: '-apple-system, sans-serif',
+  }));
+  pushHistory();
+  wrap.style.display = 'none';
+}
+
+function pushHistory() { history.push(JSON.stringify(canvas)); }
+function undo() {
+  if (history.length < 2) return;
+  history.pop();
+  canvas.loadFromJSON(history[history.length - 1], () => canvas.renderAll());
+}
+
+async function loadAnnotations(cardId, attachmentId) {
+  try {
+    const token = await t.getRestApi().getToken().catch(() => null);
+    const res   = await fetch(
+      `/api/annotations?cardId=${cardId}&attachmentId=${attachmentId}`,
+      { headers: token ? { 'x-trello-token': token } : {} }
+    );
+    if (!res.ok) return;
+    const { data } = await res.json();
+    if (data && Object.keys(data).length) {
+      const bg = canvas.item(0);
+      canvas.loadFromJSON(data, () => {
+        if (bg) canvas.sendToBack(bg);
+        canvas.renderAll();
+        pushHistory();
+        setStatus('Anotace načteny');
+      });
+    }
+  } catch { setStatus('Nepodařilo se načíst anotace'); }
+}
+
+async function saveAnnotations(cardId, attachmentId) {
+  setStatus('Ukládám…');
+  try {
+    const token = await t.getRestApi().getToken().catch(() => null);
+    const res   = await fetch('/api/annotations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'x-trello-token': token } : {}),
+      },
+      body: JSON.stringify({
+        cardId, attachmentId,
+        data: canvas.toJSON(['selectable', 'evented']),
+      }),
+    });
+    setStatus(res.ok ? '✓ Uloženo' : 'Chyba při ukládání: ' + res.status);
+  } catch (e) { setStatus('Chyba: ' + e.message); }
+}
+
+function setStatus(msg) { document.getElementById('statusbar').textContent = msg; }
+
+init();
+</script>
+</body>
+</html>
