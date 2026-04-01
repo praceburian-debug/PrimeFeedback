@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: 'url required' });
 
@@ -11,34 +11,28 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'domain not allowed' });
   }
 
-  const apiKey = process.env.TRELLO_API_KEY;
-  const apiToken = process.env.TRELLO_API_TOKEN;  // přidáme novou env proměnnou
+  const apiKey   = process.env.TRELLO_API_KEY;
+  const apiToken = process.env.TRELLO_API_TOKEN;
 
-  let fetchUrl = url;
-  if (apiKey && apiToken) {
-    const sep = url.includes('?') ? '&' : '?';
-    fetchUrl = `${url}${sep}key=${apiKey}&token=${apiToken}`;
-  }
+  const sep      = url.includes('?') ? '&' : '?';
+  const fetchUrl = apiKey && apiToken
+    ? `${url}${sep}key=${apiKey}&token=${apiToken}`
+    : url;
 
   try {
     const upstream = await fetch(fetchUrl);
     if (!upstream.ok) return res.status(upstream.status).end();
+
     const contentType = upstream.headers.get('content-type') || 'image/png';
-    const buffer = await upstream.arrayBuffer();
+    const buffer      = Buffer.from(await upstream.arrayBuffer());
+
     res.setHeader('Content-Type', contentType);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.send(Buffer.from(buffer));
+    res.setHeader('Content-Length', buffer.length);
+    res.status(200).end(buffer);
   } catch (e) {
+    console.error('Proxy error:', e);
     res.status(500).json({ error: e.message });
   }
-}
-```
-
-Teď potřebuješ přidat **server-side token** do Vercel env proměnných. Jdi na:
-
-**Vercel Dashboard → tvůj projekt → Settings → Environment Variables**
-
-Přidej:
-```
-TRELLO_API_TOKEN = <tvůj osobní token>
+};
