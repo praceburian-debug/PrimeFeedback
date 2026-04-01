@@ -54,7 +54,13 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const upstream = await fetch(finalUrl);
+    const finalUrlWithAuth = finalUrl + (finalUrl.includes('?') ? '&' : '?') + `key=${apiKey}&token=${apiToken}`;
+    const upstream = await fetch(finalUrlWithAuth, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'image/*,*/*',
+      }
+    });
     console.log('Final status:', upstream.status);
     if (!upstream.ok) return res.status(upstream.status).end();
 
