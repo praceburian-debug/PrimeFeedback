@@ -207,14 +207,10 @@ async function initViewer() {
     width: W, height: H, selection: true, isDrawingMode: false,
   });
 
-  setStatus('Načítám obrázek…');
+ setStatus('Načítám obrázek…');
   try {
-    const token = await t.getRestApi().getToken().catch(() => null);
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
-    const imgRes = await fetch(proxyUrl, {
-      headers: token ? { 'x-trello-token': token } : {},
-    });
-    if (!imgRes.ok) throw new Error('Proxy ' + imgRes.status);
+    const imgRes = await fetch(imageUrl, { credentials: 'include' });
+    if (!imgRes.ok) throw new Error('HTTP ' + imgRes.status);
     const blob    = await imgRes.blob();
     const blobUrl = URL.createObjectURL(blob);
 
