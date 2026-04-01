@@ -6,9 +6,7 @@ async function redisGet(key) {
     headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
   });
   const json = await res.json();
-  if (!json.result) return null;
-  // Upstash vrací string — parsuj pokud je to JSON
-  try { return JSON.parse(json.result); } catch { return json.result; }
+  return json.result ?? null;
 }
 
 async function redisSet(key, value) {
@@ -38,8 +36,9 @@ module.exports = async function handler(req, res) {
     const { cardId, attachmentId } = req.query;
     if (!cardId) return res.status(400).json({ error: 'cardId required' });
     const key  = `trello:card:${cardId}:annotations` + (attachmentId ? `:${attachmentId}` : '');
-    const data = await redisGet(key);
-    return res.status(200).json({ cardId, attachmentId, data: data ?? null });
+    const raw  = await redisGet(key);
+    const data = raw ? JSON.parse(raw) : null;
+    return res.status(200).json({ cardId, attachmentId, data });
   }
 
   if (req.method === 'POST') {
