@@ -18,6 +18,8 @@
       display: flex;
       flex-direction: column;
     }
+
+    /* ── Topbar ───────────────────────────────── */
     #topbar {
       display: flex;
       align-items: center;
@@ -36,6 +38,8 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       max-width: 280px; pointer-events: none;
     }
+
+    /* ── Toolbar ──────────────────────────────── */
     #toolbar {
       display: flex;
       align-items: center;
@@ -61,6 +65,10 @@
       width: 14px; height: 2px; border-radius: 1px;
       background: #7b68ee;
     }
+    /* Comment tool active = pink */
+    .tool-btn[data-tool="comment"].active { color: #e94599; }
+    .tool-btn[data-tool="comment"].active::after { background: #e94599; }
+
     .sep { width: 1px; height: 18px; background: #2a2a2e; margin: 0 5px; }
     #color-pick {
       width: 22px; height: 22px;
@@ -71,6 +79,7 @@
     #color-pick:hover { border-color: #7b68ee; }
     #stroke-size { width: 60px; accent-color: #7b68ee; cursor: pointer; }
     #stroke-label { font-size: 11px; color: #505060; min-width: 16px; }
+
     .tb-btn {
       display: flex; align-items: center; gap: 5px;
       padding: 5px 11px; border-radius: 6px; border: none;
@@ -81,13 +90,172 @@
     .btn-save  { background: #7b68ee; color: #fff; }
     .btn-undo  { background: #26262a; color: #9090a0; }
     .btn-clear { background: #26262a; color: #9090a0; }
-    .icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; flex-shrink: 0; }
+
+    .icon { width: 15px; height: 15px; fill: none; stroke: currentColor;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+      pointer-events: none; flex-shrink: 0; }
+
+    /* ── Main area ────────────────────────────── */
+    #main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Canvas ───────────────────────────────── */
     #canvas-wrap {
       flex: 1; position: relative; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       background: #232325;
     }
     #canvas-wrap canvas { display: block; }
+
+    /* ── Comment panel ────────────────────────── */
+    #comment-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: #111113;
+      border-left: 1px solid #2a2a2e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #comment-panel-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid #2a2a2e;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7070a0;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #comment-count {
+      background: #7b68ee;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 6px;
+      min-width: 18px;
+      text-align: center;
+    }
+    #comments-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+    #comments-list::-webkit-scrollbar { width: 4px; }
+    #comments-list::-webkit-scrollbar-track { background: transparent; }
+    #comments-list::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 2px; }
+
+    .comment-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e1e22;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .comment-item:hover { background: #18181a; }
+    .comment-item.active { background: #1e1a2e; border-left: 2px solid #7b68ee; }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .comment-pin {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #e94599;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .comment-author {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c0c0d8;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .comment-time {
+      font-size: 10px;
+      color: #444458;
+      flex-shrink: 0;
+    }
+    .comment-text {
+      font-size: 12px;
+      color: #9090b0;
+      line-height: 1.5;
+      padding-left: 27px;
+    }
+
+    /* No comments state */
+    #no-comments {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 100%;
+      color: #404058;
+      font-size: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+    #no-comments svg { opacity: .3; }
+
+    /* ── Comment input ────────────────────────── */
+    #comment-input-area {
+      padding: 10px 12px;
+      border-top: 1px solid #2a2a2e;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #comment-input-area.visible { display: flex; }
+    #comment-input-label {
+      font-size: 11px;
+      color: #505070;
+    }
+    #comment-textarea {
+      background: #1e1e22;
+      border: 1px solid #3a3a42;
+      color: #d0d0e0;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      height: 64px;
+      transition: border-color .12s;
+    }
+    #comment-textarea:focus { border-color: #7b68ee; }
+    #comment-input-btns {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .ci-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .ci-btn-cancel { background: #26262a; color: #9090a0; }
+    .ci-btn-submit { background: #7b68ee; color: #fff; }
+
+    /* ── Picker ───────────────────────────────── */
     #picker-view { padding: 12px; display: none; flex-direction: column; gap: 8px; }
     .att-item {
       display: flex; align-items: center; gap: 10px;
@@ -98,11 +266,15 @@
     .att-item:hover { border-color: #7b68ee; }
     .att-item img { width: 48px; height: 36px; object-fit: cover; border-radius: 4px; }
     .att-name { font-size: 12px; color: #909090; }
+
+    /* ── Status ───────────────────────────────── */
     #statusbar {
       padding: 3px 12px; font-size: 11px;
       color: #444458; background: #111113;
       border-top: 1px solid #2a2a2e; flex-shrink: 0;
     }
+
+    /* ── Text input overlay ───────────────────── */
     #text-input-wrap { position: absolute; display: none; z-index: 100; }
     #text-input {
       background: rgba(17,17,19,.96); border: 1px solid #7b68ee;
@@ -110,10 +282,14 @@
       font-size: 14px; outline: none; min-width: 160px;
       box-shadow: 0 4px 20px rgba(0,0,0,.5);
     }
+
+    /* ── Pin cursor when in comment mode ─────── */
+    body.comment-mode #canvas-wrap { cursor: crosshair; }
   </style>
 </head>
 <body>
 
+<!-- TOPBAR -->
 <div id="topbar">
   <div id="topbar-left">
     <button class="tb-btn btn-undo" id="btn-undo">
@@ -125,9 +301,7 @@
       Smazat
     </button>
   </div>
-
   <div id="topbar-center">—</div>
-
   <div id="topbar-right">
     <button class="tb-btn btn-save" id="btn-save">
       <svg class="icon" viewBox="0 0 16 16"><path d="M13 11v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2"/><line x1="8" y1="2" x2="8" y2="10"/><polyline points="5,7 8,10 11,7"/></svg>
@@ -136,6 +310,7 @@
   </div>
 </div>
 
+<!-- TOOLBAR -->
 <div id="toolbar">
   <button class="tool-btn active" data-tool="select" title="Výběr">
     <svg class="icon" viewBox="0 0 16 16"><path d="M3 2l10 5.5-5.5 1.2L6 14z"/></svg>
@@ -155,22 +330,62 @@
 
   <div class="sep"></div>
 
-  <input type="color" id="color-pick" value="#7b68ee" title="Barva" />
+  <!-- Comment tool -->
+  <button class="tool-btn" data-tool="comment" title="Přidat komentář">
+    <svg class="icon" viewBox="0 0 16 16"><path d="M13 2H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2l2 3 2-3h4a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg>
+  </button>
 
   <div class="sep"></div>
 
+  <input type="color" id="color-pick" value="#7b68ee" title="Barva" />
+  <div class="sep"></div>
   <input type="range" id="stroke-size" min="1" max="20" value="3" title="Tloušťka" />
   <span id="stroke-label">3</span>
 </div>
 
-<div id="canvas-wrap">
-  <canvas id="ann-canvas"></canvas>
-  <div id="text-input-wrap">
-    <input id="text-input" type="text" placeholder="Zadejte text…" />
+<!-- MAIN -->
+<div id="main">
+
+  <!-- CANVAS -->
+  <div id="canvas-wrap">
+    <canvas id="ann-canvas"></canvas>
+    <div id="text-input-wrap">
+      <input id="text-input" type="text" placeholder="Zadejte text…" />
+    </div>
   </div>
+
+  <!-- COMMENT PANEL -->
+  <div id="comment-panel">
+    <div id="comment-panel-header">
+      Komentáře
+      <span id="comment-count">0</span>
+    </div>
+
+    <div id="comments-list">
+      <div id="no-comments">
+        <svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="#7070a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2l2 3 2-3h4a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+        </svg>
+        <span>Žádné komentáře.<br>Vyber nástroj komentáře<br>a klikni na obrázek.</span>
+      </div>
+    </div>
+
+    <div id="comment-input-area">
+      <div id="comment-input-label">Komentář</div>
+      <textarea id="comment-textarea" placeholder="Napište komentář…"></textarea>
+      <div id="comment-input-btns">
+        <button class="ci-btn ci-btn-cancel" id="ci-cancel">Zrušit</button>
+        <button class="ci-btn ci-btn-submit" id="ci-submit">Přidat</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- PICKER -->
 <div id="picker-view"></div>
+
+<!-- STATUS -->
 <div id="statusbar">Načítám…</div>
 
 <script>
@@ -183,18 +398,25 @@ const MODE   = params.get('mode') || 'viewer';
 
 let canvas, activeTool = 'select';
 let drawStart = null, tempShape = null;
-let history = [];
+let history   = [];
+
+// Comment state
+let comments       = [];   // [{id, x, y, text, author, time}]
+let pendingPin     = null; // {x, y} before user types
+let memberName     = 'Uživatel';
+let cardId, attachmentId;
 
 const color     = () => document.getElementById('color-pick').value;
 const lineWidth = () => parseInt(document.getElementById('stroke-size').value);
 
 document.getElementById('stroke-size').addEventListener('input', function() {
   document.getElementById('stroke-label').textContent = this.value;
-  if (canvas) {
-    canvas.freeDrawingBrush.width = parseInt(this.value);
-  }
+  if (canvas) canvas.freeDrawingBrush.width = parseInt(this.value);
 });
 
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
 async function init() {
   if (MODE === 'picker')  return initPicker();
   if (MODE === 'section') return initSection();
@@ -205,7 +427,7 @@ async function init() {
 async function initPicker() {
   document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
-  document.getElementById('canvas-wrap').style.display = 'none';
+  document.getElementById('main').style.display    = 'none';
   const wrap = document.getElementById('picker-view');
   wrap.style.display = 'flex';
   const card = await t.card('attachments', 'id');
@@ -221,7 +443,7 @@ async function initPicker() {
     el.className = 'att-item';
     el.innerHTML = `<img src="${a.previews?.[0]?.url || a.url}" alt=""><span class="att-name">${a.name}</span>`;
     el.onclick = () => t.modal({
-      url:    t.signUrl(location.origin + `/viewer.html?mode=viewer&attId=${a.id}`),
+      url: t.signUrl(location.origin + `/viewer.html?mode=viewer&attId=${a.id}`),
       height: 640, title: a.name,
     });
     wrap.appendChild(el);
@@ -232,7 +454,7 @@ async function initPicker() {
 async function initSection() {
   document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
-  document.getElementById('canvas-wrap').style.display = 'none';
+  document.getElementById('main').style.display    = 'none';
   const card = await t.card('attachments', 'id');
   const count = (card.attachments || []).filter(a =>
     a.mimeType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(a.url)
@@ -248,7 +470,7 @@ async function initSection() {
 async function initAuth() {
   document.getElementById('topbar').style.display  = 'none';
   document.getElementById('toolbar').style.display = 'none';
-  document.getElementById('canvas-wrap').style.display = 'none';
+  document.getElementById('main').style.display    = 'none';
   const bar = document.getElementById('statusbar');
   bar.style.cssText = 'padding:12px;font-size:13px;color:#a0a0b0;border:none;';
   bar.textContent = 'Autorizace…';
@@ -257,7 +479,14 @@ async function initAuth() {
 
 async function initViewer() {
   setStatus('Načítám kartu…');
-  let cardId, attachmentId, imageUrl, fileName;
+
+  try {
+    // Get member name
+    const member = await t.member('fullName', 'username');
+    memberName = member.fullName || member.username || 'Uživatel';
+  } catch {}
+
+  let imageUrl, fileName;
   try {
     const attId = params.get('attId');
     const card  = await t.card('attachments', 'id');
@@ -271,6 +500,11 @@ async function initViewer() {
     attachmentId = att.id;
     imageUrl     = att.url;
     fileName     = att.name;
+
+    // Largest preview
+    const previews = att.previews || [];
+    const biggest  = previews.length ? previews[previews.length - 1] : null;
+    imageUrl       = biggest ? biggest.url : att.url;
   } catch (e) {
     setStatus('Chyba při načítání karty: ' + e.message); return;
   }
@@ -286,38 +520,32 @@ async function initViewer() {
   });
 
   setStatus('Načítám obrázek…');
-  try {
-    const card2    = await t.card('attachments');
-    const att2     = card2.attachments.find(a => a.id === attachmentId);
-    const previews = att2?.previews || [];
-    const biggest  = previews.length > 0 ? previews[previews.length - 1] : null;
-    const loadUrl  = biggest ? biggest.url : imageUrl;
+  const imgEl = new Image();
+  imgEl.onload = () => {
+    const fabricImg = new fabric.Image(imgEl);
+    const scale = Math.min(W / fabricImg.width, H / fabricImg.height, 1);
+    fabricImg.scale(scale);
+    fabricImg.set({
+      left: (W - fabricImg.width * scale) / 2,
+      top:  (H - fabricImg.height * scale) / 2,
+      selectable: false, evented: false,
+    });
+    canvas.add(fabricImg);
+    canvas.sendToBack(fabricImg);
+    setStatus('Připraveno');
+    loadData();
+  };
+  imgEl.onerror = () => setStatus('Chyba načítání obrázku');
+  imgEl.src = imageUrl;
 
-    const imgEl = new Image();
-    imgEl.onload = () => {
-      const fabricImg = new fabric.Image(imgEl);
-      const scale = Math.min(W / fabricImg.width, H / fabricImg.height, 1);
-      fabricImg.scale(scale);
-      fabricImg.set({
-        left: (W - fabricImg.width * scale) / 2,
-        top:  (H - fabricImg.height * scale) / 2,
-        selectable: false, evented: false,
-      });
-      canvas.add(fabricImg);
-      canvas.sendToBack(fabricImg);
-      setStatus('Připraveno');
-      loadAnnotations(cardId, attachmentId);
-    };
-    imgEl.onerror = () => setStatus('Chyba načítání obrázku');
-    imgEl.src = loadUrl;
-  } catch(e) {
-    setStatus('Chyba: ' + e.message);
-  }
-
-  setupTools(cardId, attachmentId);
+  setupTools();
+  setupCommentUI();
 }
 
-function setupTools(cardId, attachmentId) {
+/* ════════════════════════════════════════════
+   TOOLS
+════════════════════════════════════════════ */
+function setupTools() {
   document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
     btn.addEventListener('click', () => {
       activeTool = btn.dataset.tool;
@@ -325,6 +553,9 @@ function setupTools(cardId, attachmentId) {
       btn.classList.add('active');
       canvas.isDrawingMode = (activeTool === 'pencil');
       canvas.selection     = (activeTool === 'select');
+      document.body.classList.toggle('comment-mode', activeTool === 'comment');
+      // Hide input if switching away
+      if (activeTool !== 'comment') hideCommentInput();
     });
   });
 
@@ -335,6 +566,12 @@ function setupTools(cardId, attachmentId) {
   });
 
   canvas.on('mouse:down', (opt) => {
+    if (activeTool === 'comment') {
+      const p = canvas.getPointer(opt.e);
+      pendingPin = { x: p.x, y: p.y };
+      showCommentInput();
+      return;
+    }
     if (activeTool === 'select' || activeTool === 'pencil') return;
     const p = canvas.getPointer(opt.e);
     drawStart = { x: p.x, y: p.y };
@@ -373,8 +610,7 @@ function setupTools(cardId, attachmentId) {
     if (!tempShape) return;
     if (activeTool === 'arrow') {
       const ln    = tempShape;
-      const dx    = ln.x2 - ln.x1;
-      const dy    = ln.y2 - ln.y1;
+      const dx    = ln.x2 - ln.x1, dy = ln.y2 - ln.y1;
       const angle = Math.atan2(dy, dx) * 180 / Math.PI;
       canvas.add(new fabric.Triangle({
         left: ln.x2, top: ln.y2, width: 12, height: 16,
@@ -398,13 +634,156 @@ function setupTools(cardId, attachmentId) {
     canvas.clear();
     if (bg) canvas.add(bg);
     history = [];
+    // Re-render pins
+    renderPins();
     setStatus('Canvas vyčištěn');
   });
-  document.getElementById('btn-save').addEventListener('click', () =>
-    saveAnnotations(cardId, attachmentId)
-  );
+  document.getElementById('btn-save').addEventListener('click', saveData);
 }
 
+/* ════════════════════════════════════════════
+   COMMENT UI
+════════════════════════════════════════════ */
+function setupCommentUI() {
+  document.getElementById('ci-cancel').addEventListener('click', () => {
+    hideCommentInput();
+    pendingPin = null;
+  });
+  document.getElementById('ci-submit').addEventListener('click', submitComment);
+  document.getElementById('comment-textarea').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
+    if (e.key === 'Escape') { hideCommentInput(); pendingPin = null; }
+  });
+}
+
+function showCommentInput() {
+  const area = document.getElementById('comment-input-area');
+  area.classList.add('visible');
+  document.getElementById('comment-textarea').value = '';
+  setTimeout(() => document.getElementById('comment-textarea').focus(), 50);
+}
+
+function hideCommentInput() {
+  document.getElementById('comment-input-area').classList.remove('visible');
+}
+
+function submitComment() {
+  const text = document.getElementById('comment-textarea').value.trim();
+  if (!text || !pendingPin) return;
+
+  const comment = {
+    id:     Date.now(),
+    x:      pendingPin.x,
+    y:      pendingPin.y,
+    text,
+    author: memberName,
+    time:   new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
+  };
+  comments.push(comment);
+  hideCommentInput();
+  pendingPin = null;
+  renderPins();
+  renderCommentList();
+  setStatus('Komentář přidán — nezapomeňte uložit');
+}
+
+/* ── Pins on canvas ──────────────────────── */
+function renderPins() {
+  // Remove old pins (fabric objects with data.isPin)
+  const toRemove = canvas.getObjects().filter(o => o.data?.isPin);
+  toRemove.forEach(o => canvas.remove(o));
+
+  comments.forEach((c, i) => {
+    const num   = i + 1;
+    const circle = new fabric.Circle({
+      radius: 12, fill: '#e94599', stroke: '#fff', strokeWidth: 1.5,
+      left: c.x - 12, top: c.y - 12,
+      selectable: false, evented: true,
+      data: { isPin: true, commentId: c.id },
+    });
+    const label = new fabric.Text(String(num), {
+      fontSize: 11, fontWeight: 'bold', fill: '#fff',
+      fontFamily: '-apple-system, sans-serif',
+      left: c.x, top: c.y,
+      originX: 'center', originY: 'center',
+      selectable: false, evented: false,
+      data: { isPin: true },
+    });
+
+    // Click pin → highlight comment
+    circle.on('mousedown', () => highlightComment(c.id));
+
+    canvas.add(circle);
+    canvas.add(label);
+  });
+
+  canvas.renderAll();
+}
+
+/* ── Comment list panel ──────────────────── */
+function renderCommentList() {
+  const list = document.getElementById('comments-list');
+  const none = document.getElementById('no-comments');
+  document.getElementById('comment-count').textContent = comments.length;
+
+  if (!comments.length) {
+    none.style.display = 'flex';
+    list.innerHTML = '';
+    list.appendChild(none);
+    return;
+  }
+
+  none.style.display = 'none';
+  // Keep no-comments in DOM but hidden, rebuild items
+  const existing = list.querySelectorAll('.comment-item');
+  existing.forEach(e => e.remove());
+
+  comments.forEach((c, i) => {
+    const item = document.createElement('div');
+    item.className = 'comment-item';
+    item.dataset.id = c.id;
+    item.innerHTML = `
+      <div class="comment-header">
+        <div class="comment-pin">${i + 1}</div>
+        <div class="comment-author">${escHtml(c.author)}</div>
+        <div class="comment-time">${c.time}</div>
+      </div>
+      <div class="comment-text">${escHtml(c.text)}</div>
+    `;
+    item.addEventListener('click', () => highlightComment(c.id));
+    list.appendChild(item);
+  });
+}
+
+function highlightComment(id) {
+  document.querySelectorAll('.comment-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id == id);
+  });
+  // Scroll to it
+  const el = document.querySelector(`.comment-item[data-id="${id}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ════════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════════ */
+function pushHistory() { history.push(JSON.stringify(canvas)); }
+function undo() {
+  if (history.length < 2) return;
+  history.pop();
+  canvas.loadFromJSON(history[history.length - 1], () => {
+    canvas.renderAll();
+    renderPins();
+  });
+}
+
+/* ════════════════════════════════════════════
+   TEXT INPUT
+════════════════════════════════════════════ */
 function placeTextInput(x, y) {
   const wrap  = document.getElementById('text-input-wrap');
   const input = document.getElementById('text-input');
@@ -431,40 +810,51 @@ function commitText(x, y) {
   wrap.style.display = 'none';
 }
 
-function pushHistory() { history.push(JSON.stringify(canvas)); }
-function undo() {
-  if (history.length < 2) return;
-  history.pop();
-  canvas.loadFromJSON(history[history.length - 1], () => canvas.renderAll());
-}
-
-async function loadAnnotations(cardId, attachmentId) {
+/* ════════════════════════════════════════════
+   LOAD / SAVE
+════════════════════════════════════════════ */
+async function loadData() {
   try {
     const res = await fetch(`/api/annotations?cardId=${cardId}&attachmentId=${attachmentId}`);
     if (!res.ok) return;
     const { data } = await res.json();
-    if (data && Object.keys(data).length) {
+    if (!data) return;
+
+    // Load drawing
+    if (data.canvas && Object.keys(data.canvas).length) {
       const bg = canvas.item(0);
-      canvas.loadFromJSON(data, () => {
+      canvas.loadFromJSON(data.canvas, () => {
         if (bg) canvas.sendToBack(bg);
         canvas.renderAll();
         pushHistory();
-        setStatus('Anotace načteny');
       });
     }
-  } catch { setStatus('Nepodařilo se načíst anotace'); }
+
+    // Load comments
+    if (data.comments && data.comments.length) {
+      comments = data.comments;
+      renderPins();
+      renderCommentList();
+    }
+
+    setStatus('Data načtena');
+  } catch { setStatus('Nepodařilo se načíst data'); }
 }
 
-async function saveAnnotations(cardId, attachmentId) {
+async function saveData() {
   setStatus('Ukládám…');
   const btn = document.getElementById('btn-save');
   try {
+    // Strip pin objects from canvas JSON before saving
+    const canvasJson = canvas.toJSON(['selectable', 'evented', 'data']);
+    canvasJson.objects = (canvasJson.objects || []).filter(o => !o.data?.isPin);
+
     const res = await fetch('/api/annotations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cardId, attachmentId,
-        data: canvas.toJSON(['selectable', 'evented']),
+        data: { canvas: canvasJson, comments },
       }),
     });
     if (res.ok) {
