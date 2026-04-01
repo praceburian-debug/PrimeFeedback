@@ -47,7 +47,7 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-trello-token');
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
