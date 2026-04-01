@@ -205,7 +205,8 @@ async function initViewer() {
   });
 
   setStatus('Načítám obrázek…');
-  fabric.Image.fromURL(imageUrl, (img) => {
+const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
+fabric.Image.fromURL(proxyUrl, (img) => {
     const scale = Math.min(W / img.width, H / img.height, 1);
     img.scale(scale);
     img.set({
@@ -217,7 +218,7 @@ async function initViewer() {
     canvas.sendToBack(img);
     setStatus('Připraveno');
     loadAnnotations(cardId, attachmentId);
-  }, { crossOrigin: 'anonymous' });
+  });
 
   setupTools(cardId, attachmentId);
 }
